@@ -156,4 +156,17 @@ public class GuiColourButton extends GuiControl
 	{
 		return (this.picker != null) ? this.picker.textBoxKeyTyped(keyChar, keyCode) : false;
 	}
+
+	public boolean isPickerOpen()
+	{
+		return this.picker != null;
+	}
+
+	public void updateCursorCounter()
+	{
+		if (this.picker != null)
+		{
+			this.picker.updateCursorCounter();
+		}
+	}
 }

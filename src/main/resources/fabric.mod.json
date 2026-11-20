@@ -18,6 +18,9 @@
 	"entrypoints": {
 		"client-init": [
 			"com.mumfrey.worldeditcui.ModWorldEditCUI"
+		],
+		"modmenu": [
+			"com.mumfrey.worldeditcui.gui.ModMenuImpl"
 		]
 	},
 	"mixins": [

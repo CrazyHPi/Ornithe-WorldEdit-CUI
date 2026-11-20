@@ -54,6 +54,10 @@ dependencies {
 
 	// ornithe worldedit
 	modRuntimeOnly "worldedit-bridge:WorldEditBridge:${project.we_version}+mc1.12.2"
+
+	//mod menu (optional, only needed for the config screen integration)
+	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	modRuntimeOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
 processResources {

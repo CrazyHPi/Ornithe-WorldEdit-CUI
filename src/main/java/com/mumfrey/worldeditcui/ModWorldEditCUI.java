@@ -22,9 +22,6 @@ import com.mumfrey.worldeditcui.config.CUIConfiguration;
 import com.mumfrey.worldeditcui.event.listeners.CUIListenerChannel;
 import com.mumfrey.worldeditcui.event.listeners.CUIListenerWorldRender;
 
-//todo config panel
-//import com.mumfrey.worldeditcui.gui.CUIConfigPanel;
-
 /**
  * Main Ornithe mod entry point.
  * Ported to Ornithe.
@@ -204,14 +201,6 @@ public class ModWorldEditCUI implements ClientModInitializer
 	{
 		return "WorldEditCUI";
 	}
-
-
-	//todo config panel
-//	@Override
-//	public Class<? extends ConfigPanel> getConfigPanelClass()
-//	{
-//		return CUIConfigPanel.class;
-//	}
 
 
 	public void onPostRenderEntities(float partialTicks)
