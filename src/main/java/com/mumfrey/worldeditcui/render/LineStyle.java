@@ -1,6 +1,6 @@
 package com.mumfrey.worldeditcui.render;
 
-import static com.mumfrey.liteloader.gl.GL.*;
+import static com.mumfrey.worldeditcui.util.GL.*;
 
 import com.mumfrey.worldeditcui.render.RenderStyle.RenderType;
 

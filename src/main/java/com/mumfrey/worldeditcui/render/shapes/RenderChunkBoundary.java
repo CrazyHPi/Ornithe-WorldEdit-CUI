@@ -1,6 +1,6 @@
 package com.mumfrey.worldeditcui.render.shapes;
 
-import static com.mumfrey.liteloader.gl.GL.*;
+import static com.mumfrey.worldeditcui.util.GL.*;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -104,7 +104,7 @@ public class RenderChunkBoundary extends RenderRegion
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buf = tessellator.getBuffer();
 
-		Chunk chunk = this.mc.world.getChunkFromChunkCoords(xChunk, zChunk);
+		Chunk chunk = this.mc.world.getChunk(xChunk, zChunk);
 
 		for (LineStyle line : this.style.getLines())
 		{

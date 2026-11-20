@@ -1,6 +1,6 @@
 package com.mumfrey.worldeditcui.gui.controls;
 
-import static com.mumfrey.liteloader.gl.GL.*;
+import static com.mumfrey.worldeditcui.util.GL.*;
 
 import java.awt.Color;
 import java.awt.Rectangle;

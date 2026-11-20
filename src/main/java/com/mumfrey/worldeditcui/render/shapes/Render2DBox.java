@@ -10,7 +10,7 @@ import com.mumfrey.worldeditcui.util.Vector3;
 
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.BufferBuilder;
-import static com.mumfrey.liteloader.gl.GL.*;
+import static com.mumfrey.worldeditcui.util.GL.*;
 
 /**
  * Draws the top and bottom rings of a polygon region
