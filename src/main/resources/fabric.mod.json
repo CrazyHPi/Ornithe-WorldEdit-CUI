@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "worldedit-cui",
+	"version": "${version}",
+	"name": "Ornithe WorldEdit CUI",
+	"description": "WorldEdit client interface for Minecraft. Ornithe version.",
+	"authors": [
+		"Adam Mummery-Smith",
+		"CrazyH"
+	],
+	"contact": {
+		"homepage": "https://github.com/CrazyHPi/Ornithe-WorldEdit-CUI",
+		"sources": "https://github.com/CrazyHPi/Ornithe-WorldEdit-CUI"
+	},
+	"license": "LGPL-3.0-or-later",
+	"icon": "assets/example/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client-init": [
+			"com.mumfrey.worldeditcui.ModWorldEditCUI"
+		]
+	},
+	"mixins": [
+      "wecui.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.13.3",
+		"minecraft": "1.12.2",
+		"osl": "*"
+    }
+}

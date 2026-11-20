@@ -2,153 +2,112 @@ package com.mumfrey.worldeditcui;
 
 import io.netty.buffer.Unpooled;
 
-import java.io.File;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.network.INetHandler;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketJoinGame;
-
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.ornithemc.osl.entrypoints.api.client.ClientModInitializer;
+import net.ornithemc.osl.keybinds.api.KeybindEvents;
+import net.ornithemc.osl.keybinds.api.KeybindRegistry;
 import org.lwjgl.input.Keyboard;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.mojang.realmsclient.dto.RealmsServer;
-import com.mumfrey.liteloader.Configurable;
-import com.mumfrey.liteloader.InitCompleteListener;
-import com.mumfrey.liteloader.JoinGameListener;
-import com.mumfrey.liteloader.PluginChannelListener;
-import com.mumfrey.liteloader.PostRenderListener;
-import com.mumfrey.liteloader.Tickable;
-import com.mumfrey.liteloader.core.ClientPluginChannels;
-import com.mumfrey.liteloader.core.LiteLoader;
-import com.mumfrey.liteloader.core.PluginChannels.ChannelPolicy;
-import com.mumfrey.liteloader.messaging.Message;
-import com.mumfrey.liteloader.messaging.Messenger;
-import com.mumfrey.liteloader.modconfig.ConfigPanel;
-import com.mumfrey.liteloader.util.Input;
 import com.mumfrey.worldeditcui.config.CUIConfiguration;
 import com.mumfrey.worldeditcui.event.listeners.CUIListenerChannel;
 import com.mumfrey.worldeditcui.event.listeners.CUIListenerWorldRender;
-import com.mumfrey.worldeditcui.gui.CUIConfigPanel;
+
+//todo config panel
+//import com.mumfrey.worldeditcui.gui.CUIConfigPanel;
 
 /**
- * Main litemod entry point
- * 
+ * Main Ornithe mod entry point.
+ * Ported to Ornithe.
+ *
+ * @author CrazyH
  * @author Adam Mummery-Smith
  */
-public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, PluginChannelListener, PostRenderListener, Configurable, JoinGameListener, Messenger
+public class ModWorldEditCUI implements ClientModInitializer
 {
+	public static final Set<String> remotePluginChannels = new HashSet<>();
+	public static ModWorldEditCUI INSTANCE;
+
 	private static final int DELAYED_HELO_TICKS = 10;
 
-	private static final String CHANNEL_WECUI = "WECUI";
-	
+	public static final String CHANNEL_WECUI = "WECUI";
+
 	private WorldEditCUI controller;
 	private WorldClient lastWorld;
 	private EntityPlayerSP lastPlayer;
-	
+
 	private KeyBinding keyBindToggleUI = new KeyBinding("wecui.keys.toggle", Keyboard.KEY_NONE, "wecui.keys.category");
 	private KeyBinding keyBindClearSel = new KeyBinding("wecui.keys.clear", Keyboard.KEY_NONE, "wecui.keys.category");
 	private KeyBinding keyBindChunkBorder = new KeyBinding("wecui.keys.chunk", Keyboard.KEY_NONE, "wecui.keys.category");
-	
+
 	private boolean visible = true;
 	private boolean alwaysOnTop = false;
-	
+
 	private CUIListenerWorldRender worldRenderListener;
 	private CUIListenerChannel channelListener;
-	
+
 	private int delayedHelo = 0;
-	
-	@Override
-	public void init(File configPath)
+
+
+	public static void sendCUIPacket(PacketBuffer buffer)
 	{
-		Input input = LiteLoader.getInput();
-		input.registerKeyBinding(this.keyBindToggleUI);
-		input.registerKeyBinding(this.keyBindClearSel);
-		input.registerKeyBinding(this.keyBindChunkBorder);
+		CPacketCustomPayload packet = new CPacketCustomPayload(CHANNEL_WECUI, buffer);
+		Minecraft.getMinecraft().player.connection.sendPacket(packet);
 	}
-	
+
 	@Override
-	public void upgradeSettings(String version, File configPath, File oldConfigPath)
+	public void initClient()
 	{
+        INSTANCE = this;
+
+		KeybindEvents.REGISTER_KEYBINDS.register(() -> {
+			KeybindRegistry.register(this.keyBindToggleUI);
+			KeybindRegistry.register(this.keyBindClearSel);
+			KeybindRegistry.register(this.keyBindChunkBorder);
+		});
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.mumfrey.liteloader.InitCompleteListener#onInitCompleted(net.minecraft.client.Minecraft, com.mumfrey.liteloader.core.LiteLoader)
-	 */
-	@Override
-	public void onInitCompleted(Minecraft minecraft, LiteLoader loader)
+
+	public void onInitCompleted(Minecraft minecraft)
 	{
 		this.controller = new WorldEditCUI();
 		this.controller.initialise(minecraft);
-		
+
 		this.worldRenderListener = new CUIListenerWorldRender(this.controller, minecraft);
 		this.channelListener = new CUIListenerChannel(this.controller);
 	}
-	
-	@Override
-	public void onJoinGame(INetHandler netHandler, SPacketJoinGame loginPacket, ServerData serverData, RealmsServer realmsServer)
+
+
+	public void onJoinGame()
 	{
+		remotePluginChannels.clear();
+
 		this.visible = true;
 		this.controller.getDebugger().debug("Joined game, sending initial handshake");
 		this.helo();
 	}
-	
-	/**
-	 * 
-	 */
+
+
 	private void helo()
 	{
 		PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
 		String message = "v|" + WorldEditCUI.PROTOCOL_VERSION;
 		buffer.writeBytes(message.getBytes(Charsets.UTF_8));
-		ClientPluginChannels.sendMessage(CHANNEL_WECUI, buffer, ChannelPolicy.DISPATCH_ALWAYS);
+		sendCUIPacket(buffer);
 	}
-	
-	@Override
-	public List<String> getMessageChannels()
-	{
-		return ImmutableList.<String>of("wecui:wecui");
-	}
-	
-	@Override
-	public void receiveMessage(Message message)
-	{
-		if (message.isChannel("wecui:wecui"))
-		{
-			try
-			{
-				Object value = message.<Object>getValue();
-				if (value instanceof String)
-				{
-					this.channelListener.onMessage((String)value);
-				}
-				else if (value instanceof List)
-				{
-					@SuppressWarnings("unchecked")
-					List<Object> list = (List<Object>)value;
-					this.channelListener.onMessage(Joiner.on('|').join(list));
-				}
-			}
-			catch (Exception ex) {}
-		}
-	}
-	
-	@Override
-	public List<String> getChannels()
-	{
-		return ImmutableList.<String>of(LiteModWorldEditCUI.CHANNEL_WECUI);
-	}
-	
-	@Override
-	public void onCustomPayload(String channel, PacketBuffer data)
+
+	// receiveMessage(Message message) is removed
+	// it is for Liteloader's internal message API, not used
+
+	public void onCustomPayload(PacketBuffer data)
 	{
 		try
 		{
@@ -166,9 +125,9 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 		}
 		catch (Exception ex) {}
 	}
-	
-	@Override
-	public void onTick(Minecraft mc, float partialTicks, boolean inGame, boolean clock)
+
+
+	public void onTick(Minecraft mc, boolean inGame, boolean clock)
 	{
 		CUIConfiguration config = this.controller.getConfiguration();
 		
@@ -218,7 +177,7 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 				this.controller.getDebugger().debug("World change detected, sending new handshake");
 				this.controller.clear();
 				this.helo();
-				this.delayedHelo = LiteModWorldEditCUI.DELAYED_HELO_TICKS;
+				this.delayedHelo = ModWorldEditCUI.DELAYED_HELO_TICKS;
 				if (mc.player != null && config.isPromiscuous())
 				{
 					mc.player.sendChatMessage("/we cui"); //Tricks WE to send the current selection
@@ -231,7 +190,7 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 				if (this.delayedHelo == 0)
 				{
 					this.helo();
-					if (LiteLoader.getClientPluginChannels().isRemoteChannelRegistered(CHANNEL_WECUI) && mc.player != null)
+					if (remotePluginChannels.contains(CHANNEL_WECUI) && mc.player != null)
 					{
 						mc.player.sendChatMessage("/we cui");
 					}
@@ -239,26 +198,22 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 			}
 		}
 	}
-	
-	@Override
+
+
 	public String getName()
 	{
 		return "WorldEditCUI";
 	}
-	
-	@Override
-	public String getVersion()
-	{
-		return "1.12.1_01";
-	}
-	
-	@Override
-	public Class<? extends ConfigPanel> getConfigPanelClass()
-	{
-		return CUIConfigPanel.class;
-	}
-	
-	@Override
+
+
+	//todo config panel
+//	@Override
+//	public Class<? extends ConfigPanel> getConfigPanelClass()
+//	{
+//		return CUIConfigPanel.class;
+//	}
+
+
 	public void onPostRenderEntities(float partialTicks)
 	{
 		if (this.visible && !this.alwaysOnTop)
@@ -268,8 +223,8 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 			RenderHelper.enableStandardItemLighting();
 		}
 	}
-	
-	@Override
+
+
 	public void onPostRender(float partialTicks)
 	{
 		if (this.visible && this.alwaysOnTop)
@@ -277,7 +232,7 @@ public class LiteModWorldEditCUI implements Tickable, InitCompleteListener, Plug
 			this.worldRenderListener.onRender(partialTicks);
 		}
 	}
-	
+
 	public WorldEditCUI getController()
 	{
 		return this.controller;
