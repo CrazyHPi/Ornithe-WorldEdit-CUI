@@ -13,8 +13,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.ornithemc.osl.entrypoints.api.client.ClientModInitializer;
-import net.ornithemc.osl.keybinds.api.KeybindEvents;
-import net.ornithemc.osl.keybinds.api.KeybindRegistry;
+import net.ornithemc.osl.keybinds.api.KeyBindingEvents;
 import org.lwjgl.input.Keyboard;
 
 import com.google.common.base.Charsets;
@@ -66,10 +65,10 @@ public class ModWorldEditCUI implements ClientModInitializer
 	{
         INSTANCE = this;
 
-		KeybindEvents.REGISTER_KEYBINDS.register(() -> {
-			KeybindRegistry.register(this.keyBindToggleUI);
-			KeybindRegistry.register(this.keyBindClearSel);
-			KeybindRegistry.register(this.keyBindChunkBorder);
+		KeyBindingEvents.REGISTER_KEYBINDS.register(registry -> {
+			registry.register(this.keyBindToggleUI);
+			registry.register(this.keyBindClearSel);
+			registry.register(this.keyBindChunkBorder);
 		});
 	}
 
