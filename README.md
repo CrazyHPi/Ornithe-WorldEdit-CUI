@@ -1,5 +1,13 @@
-WorldEditCUI
+Ornithe WorldEditCUI
 ------------
+
+This mod has been ported to [Ornithe](https://ornithemc.net/) mod loader. 
+
+Ornithe version of WorldEdit can be found at [github](https://github.com/CrazyHPi/Ornithe-WorldEditBridge) or [modrinth](https://modrinth.com/mod/ornithe-worldeditbridge).
+
+Versions:
+ - `1.0.0` is for Ornithe gen1
+ - `2.0.0` is for Ornithe gen2
 
 A graphical user interface for WorldEdit. WorldEditCUI is designed 
 to assist in using WorldEdit, as well as preventing accidental errors.
@@ -12,12 +20,12 @@ WorldEdit installed on your server or in SinglePlayerCommands to use this mod.
 Compiling
 ---------
 
-You will need a [LiteLoader MCP workspace](https://www.youtube.com/watch?v=RMpvo-F4AFc), once you have that set up simply import the project and run the ant build script.
-
+Simply clone the project and run `gradle build` task.
 
 Credits
 -------
 
+ * [Mumfrey](https://github.com/Mumfrey) - Liteloader version of the WorldEdit CUI
  * [lahwran](https://github.com/lahwran) - Creator of the original WorldEdit CUI!
  * [sk89q](http://sk89q.com) for writing the WorldEdit plugin!
  * TomyLobo and zml2008 for maintaining WorldEdit!
